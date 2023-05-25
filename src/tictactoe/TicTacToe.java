@@ -6,8 +6,11 @@ import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.util.Random;
 
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -15,7 +18,7 @@ import javax.swing.JPanel;
 
 public class TicTacToe implements ActionListener {
 
-	private	boolean playerTurn, isComputer = false;
+	private	boolean playerTurn, isComputer = true;
 	private static final int DEFAULT_BOARDSIZE = 9; 
 	private static final int[][] winCombination = setWinCombination(); 
 	
@@ -37,7 +40,7 @@ public class TicTacToe implements ActionListener {
 
 		textfield.setBackground(new Color(60, 60, 60));
 		textfield.setForeground(new Color(25, 250, 0));
-		textfield.setFont(new Font("Comic Sans MS", Font.BOLD, 22));
+		textfield.setFont(new Font("Calibri", Font.BOLD, 22));
 		textfield.setHorizontalAlignment(JLabel.CENTER);
 		textfield.setText("Хрестики-Нолики");
 		textfield.setOpaque(true);
@@ -50,11 +53,12 @@ public class TicTacToe implements ActionListener {
 		for (int i = 0; i < DEFAULT_BOARDSIZE; i++) {
 			buttons[i] = new JButton();
 			button_panel.add(buttons[i]);
-			buttons[i].setFont(new Font("MV Boli", Font.BOLD, 120));
+//			buttons[i].setFont(new Font("Microsoft Yi Baiti", Font.CENTER_BASELINE, 100));
 			buttons[i].setFocusable(false);
 			buttons[i].setBackground(new Color(99, 57, 116));
 			buttons[i].setEnabled(false);
 			buttons[i].addActionListener(this);
+						
 		}
 
 		title_panel.add(textfield);
@@ -68,7 +72,7 @@ public class TicTacToe implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		for (int i = 0; i < DEFAULT_BOARDSIZE; i++) {
 			if (e.getSource() == buttons[i]) {
-				if (buttons[i].getText() == "") {
+				if (buttons[i].getName() == null) {
 					if (playerTurn) {
 						turnx(i);
 					} else {
@@ -114,18 +118,26 @@ public class TicTacToe implements ActionListener {
 
 //	хід за хрестики
 	public void turnx(int i) {
+		File file = new File("src\\tictactoe\\img\\cross.png");
+		Icon icon = new ImageIcon(file.getAbsolutePath());
 		buttons[i].setForeground(new Color(0, 0, 225));
-		buttons[i].setText("X");
+//		buttons[i].setText("X");
+		buttons[i].setIcon(icon);
+		buttons[i].setName("X");
 		textfield.setText("Хід 0");
 		checkWinner();
 		playerTurn = false;	
 	}
 
 //	хід за нулики
-	public void turn0(int i) {
+	public void turn0(int i) {		
+		File file = new File("src\\tictactoe\\img\\zero.png");
+		Icon icon = new ImageIcon(file.getAbsolutePath());
 		buttons[i].setForeground(new Color(225, 0, 0));
-		buttons[i].setText("0");
-		textfield.setText("Хід X");
+//		buttons[i].setText("0");
+		buttons[i].setIcon(icon);
+		buttons[i].setName("0");
+		textfield.setText("Хід X");		
 		checkWinner();
 		playerTurn = true;		
 	}
@@ -137,7 +149,7 @@ public class TicTacToe implements ActionListener {
 		 * нічия може бути коли всі кнопки заповнені та відсутня переможна комбінація
 		 */
 		for (fillButtons = 0; fillButtons < DEFAULT_BOARDSIZE; fillButtons++) {
-			if (buttons[fillButtons].getText() == "") {
+			if (buttons[fillButtons].getName() == null) {
 				break;
 			}
 		}
@@ -156,17 +168,17 @@ public class TicTacToe implements ActionListener {
 
 	public void checkWinnerCombination(int first, int second, int third) {
 
-		if (buttons[first].getText() == buttons[second].getText()  
-				&& buttons[first].getText() == buttons[third].getText()
-				&& buttons[first].getText() != "") {
+		if (buttons[first].getName() == buttons[second].getName()  
+				&& buttons[first].getName() == buttons[third].getName()
+				&& buttons[first].getName() != null) {
 			Wins(first, second, third);
 		}
 	}
 
 	public void Wins(int first, int second, int third) {
-		buttons[first].setBackground(Color.GREEN);
-		buttons[second].setBackground(Color.GREEN);
-		buttons[third].setBackground(Color.GREEN);
+		buttons[first].setBackground(new Color(173,254,47));
+		buttons[second].setBackground(new Color(127,255,0));
+		buttons[third].setBackground(new Color(0,255,0));
 
 		for (int i = 0; i < DEFAULT_BOARDSIZE; i++) {
 			buttons[i].setEnabled(false);
@@ -219,8 +231,9 @@ public class TicTacToe implements ActionListener {
 	public String[] convertToString() {
 		String[] copyButtons = new String[buttons.length];
 		for(int i = 0; i < buttons.length; i++) {			
-			if (!buttons[i].getText().equals("")) {
-				copyButtons[i] = buttons[i].getText();
+			if (buttons[i].getName() != null) {
+				copyButtons[i] = buttons[i].getName();
+
 			}
 		}
 
@@ -236,8 +249,7 @@ public class TicTacToe implements ActionListener {
 	}
 
 	public Score minimax(String[] moves, boolean oppTurn, int deep) {
-		
-		
+				
 		String[] copyMoves = moves.clone();
 		int bestScore, bestPosition = 0;
 		oppTurn = oppTurn ? false : true;	
@@ -287,10 +299,10 @@ public class TicTacToe implements ActionListener {
 					}
 			
 					
-					if(deep == 1) {
-						System.out.println("BestScore:" +  bestScore);	
-						System.out.println("BestPosition:" +  bestPosition);	
-					}
+//					if(deep == 1) {
+//						System.out.println("BestScore:" +  bestScore);	
+//						System.out.println("BestPosition:" +  bestPosition);	
+//					}
 
 					
 				}
