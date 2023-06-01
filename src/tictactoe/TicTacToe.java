@@ -1,77 +1,148 @@
 package tictactoe;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.File;
+import java.awt.*;
+import java.awt.event.*;
 import java.util.Random;
+import javax.swing.*;
 
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
 
 public class TicTacToe implements ActionListener {
 
-	private	boolean playerTurn, isComputer = true;
+	private	boolean playerTurn; 	//true  - хід хрестиків, false - хід нуликів
+	private boolean isAI = true;	//true  - грає ai
+	private boolean isOver = false; //true  - кінець гри
+	private boolean player1;		//визначаэмо за кого буде грати перший гравець
 	private static final int DEFAULT_BOARDSIZE = 9; 
+	private static int TOTALSCORE_PLAYER1 = 0;
+	private static int TOTALSCORE_PLAYER2 = 0;
 	private static final int[][] winCombination = setWinCombination(); 
 	
 	Random random = new Random();
+	ImageIcon logo = new ImageIcon(getClass().getResource("/resources/logo.png"));
 	JFrame frame = new JFrame();
 	JPanel title_panel = new JPanel();
+	JPanel radio_panel = new JPanel();
+	JPanel score_panel = new JPanel();
 	JPanel button_panel = new JPanel();
 	JLabel textfield = new JLabel();
+	JLabel scorePlayer1 = new JLabel();
+	JLabel scorePlayer2 = new JLabel();
 	JButton[] buttons = new JButton[DEFAULT_BOARDSIZE];
-
+	JButton newGame = new JButton();
+	JRadioButton playerPlayer = new JRadioButton("людина");
+	JRadioButton aiPlayer = new JRadioButton("аі", true);
+	ButtonGroup group = new ButtonGroup();
+	
 
 	TicTacToe() {
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setSize(400, 400);
-//	frame.getContentPane().setBackground(new Color(99,57,116));
-		frame.setLayout(new BorderLayout());
-		frame.setLocationRelativeTo(null);
-		frame.setVisible(true);
-
-		textfield.setBackground(new Color(60, 60, 60));
+	
+//налаштування панелі інформаційного текстового рядка 
+		textfield.setBounds(0, 0, 400, 32);
 		textfield.setForeground(new Color(25, 250, 0));
-		textfield.setFont(new Font("Calibri", Font.BOLD, 22));
-		textfield.setHorizontalAlignment(JLabel.CENTER);
-		textfield.setText("Хрестики-Нолики");
-		textfield.setOpaque(true);
-		title_panel.setLayout(new BorderLayout());
-//		title_panel.setBounds(0,0,800,100);
+		textfield.setFont(new Font("Courier", Font.BOLD, 20));
+		textfield.setHorizontalAlignment(JLabel.CENTER);		
+		textfield.setText("Хрестики-Нолики");	
+		textfield.setOpaque(false);
+		
+		title_panel.setBackground(new Color(60, 60, 60));
+		title_panel.setLayout(null);
+		title_panel.setBounds(0,0,400,32);
+		title_panel.add(textfield);
+		
+		
+//налаштування панелі рахунків
+		scorePlayer1.setBounds(0, 0, 150, 75);
+		scorePlayer1.setText(Integer.toString(TOTALSCORE_PLAYER1));
+		scorePlayer1.setFont(new Font("MV Boli", Font.PLAIN,40));
+		scorePlayer1.setHorizontalAlignment(JLabel.CENTER);
 
-		button_panel.setLayout(new GridLayout(3, 0));
-		// button_panel.setBackground(new Color(150,150,150));
+		scorePlayer2.setBounds(250, 0, 150, 75);
+		scorePlayer2.setText(Integer.toString(TOTALSCORE_PLAYER2));
+		scorePlayer2.setFont(new Font("MV Boli", Font.PLAIN,40));
+		scorePlayer2.setHorizontalAlignment(JLabel.CENTER);		
+		
+		newGame.setBackground(new Color(120, 120, 120));
+		newGame.setForeground(Color.green);
+		newGame.setBounds(150, 0, 100, 75);
+		newGame.setSize(100, 75);
+		newGame.setText("Нова гра");
+		newGame.setFocusable(false);
+		newGame.addActionListener(this);	
+		
+		score_panel.setLayout(null);		
+		score_panel.setBounds(0,32,400,75);
+		score_panel.setBackground(new Color(140, 140, 140));
+		score_panel.add(scorePlayer1);		
+		score_panel.add(newGame);		
+		score_panel.add(scorePlayer2);	
+		
+		
+//налаштування панелі радіокнопок	
+		playerPlayer.addActionListener(this);
+		playerPlayer.setOpaque(false);
 
+		aiPlayer.addActionListener(this);
+		aiPlayer.setOpaque(false);
+					
+		group.add(playerPlayer);
+		group.add(aiPlayer);
+
+		radio_panel.setLayout(new FlowLayout());		
+		radio_panel.setBounds(0,107,400,32);
+		radio_panel.setBackground(Color.green);
+		radio_panel.add(playerPlayer);
+		radio_panel.add(aiPlayer);
+
+
+		
+//налаштування панелі кнопок
+		button_panel.setLayout(new GridLayout(3, 3));
+		button_panel.setBounds(0,139,400,400);
 		for (int i = 0; i < DEFAULT_BOARDSIZE; i++) {
 			buttons[i] = new JButton();
 			button_panel.add(buttons[i]);
-//			buttons[i].setFont(new Font("Microsoft Yi Baiti", Font.CENTER_BASELINE, 100));
 			buttons[i].setFocusable(false);
 			buttons[i].setBackground(new Color(99, 57, 116));
 			buttons[i].setEnabled(false);
-			buttons[i].addActionListener(this);
-						
+			buttons[i].addActionListener(this);						
 		}
-
-		title_panel.add(textfield);
-		frame.add(title_panel, BorderLayout.NORTH);
+			
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setSize(415, 577);
+		frame.setLayout(null);
+		frame.setLocationRelativeTo(null);
+		frame.setResizable(false);		
+		frame.setTitle("Хрестики-Нолики");
+		frame.setIconImage(logo.getImage());
+		
+//додаємо панелі на екран		
+		frame.add(title_panel);
+		frame.add(radio_panel);
+		frame.add(score_panel);
 		frame.add(button_panel);
+		
+		frame.setVisible(true);
 
-		firstTurn();
+		player1 = firstTurn();
 	}
-
+  	
 	@Override
-	public void actionPerformed(ActionEvent e) {
+	public void actionPerformed(ActionEvent e) {		
+		if(e.getSource()==newGame) {
+			reset();	
+			return;
+		}
+		
+		if(e.getSource()==playerPlayer) {
+			isAI = false;
+			return;
+		} else if(e.getSource()==aiPlayer) {
+			isAI = true;
+			return;
+		}
+				
 		for (int i = 0; i < DEFAULT_BOARDSIZE; i++) {
-			if (e.getSource() == buttons[i]) {
+			if (e.getSource() == buttons[i]) {				
 				if (buttons[i].getName() == null) {
 					if (playerTurn) {
 						turnx(i);
@@ -79,8 +150,8 @@ public class TicTacToe implements ActionListener {
 						turn0(i);
 					}
 //Якщо людина натиснула на порожню клітину то грає комп'ютер	
-					if (isComputer) {
-						comuterPlaying();
+					if (isAI && !isOver) {
+						aiPlaying();
 					}
 				
 				}
@@ -89,7 +160,7 @@ public class TicTacToe implements ActionListener {
 		}
 	}
 
-	public void firstTurn() {
+	public boolean firstTurn() {
 
 //виводимо назву та починаємо гру
 		try {
@@ -113,17 +184,17 @@ public class TicTacToe implements ActionListener {
 			playerTurn = true;
 			textfield.setText("Хід X");
 		}
+		return playerTurn;
 
 	}
 
 //	хід за хрестики
 	public void turnx(int i) {
-		File file = new File("src\\tictactoe\\img\\cross.png");
-		Icon icon = new ImageIcon(file.getAbsolutePath());
-		buttons[i].setForeground(new Color(0, 0, 225));
+		Icon icon = new ImageIcon(getClass().getResource("/resources/cross.png"));
+//		Icon icon = new ImageIcon("img\\cross.png");
 //		buttons[i].setText("X");
 		buttons[i].setIcon(icon);
-		buttons[i].setName("X");
+		buttons[i].setName("X");	
 		textfield.setText("Хід 0");
 		checkWinner();
 		playerTurn = false;	
@@ -131,9 +202,8 @@ public class TicTacToe implements ActionListener {
 
 //	хід за нулики
 	public void turn0(int i) {		
-		File file = new File("src\\tictactoe\\img\\zero.png");
-		Icon icon = new ImageIcon(file.getAbsolutePath());
-		buttons[i].setForeground(new Color(225, 0, 0));
+		Icon icon = new ImageIcon(getClass().getResource("/resources/zero.png"));
+//		Icon icon = new ImageIcon("img\\zero.png");
 //		buttons[i].setText("0");
 		buttons[i].setIcon(icon);
 		buttons[i].setName("0");
@@ -145,9 +215,7 @@ public class TicTacToe implements ActionListener {
 	public void checkWinner() {
 		int fillButtons = 0;
 
-		/*
-		 * нічия може бути коли всі кнопки заповнені та відсутня переможна комбінація
-		 */
+// нічия може бути коли всі кнопки заповнені та відсутня переможна комбінація
 		for (fillButtons = 0; fillButtons < DEFAULT_BOARDSIZE; fillButtons++) {
 			if (buttons[fillButtons].getName() == null) {
 				break;
@@ -167,7 +235,6 @@ public class TicTacToe implements ActionListener {
 
 
 	public void checkWinnerCombination(int first, int second, int third) {
-
 		if (buttons[first].getName() == buttons[second].getName()  
 				&& buttons[first].getName() == buttons[third].getName()
 				&& buttons[first].getName() != null) {
@@ -187,8 +254,18 @@ public class TicTacToe implements ActionListener {
 			textfield.setText("Перемогли X");
 		} else {
 			textfield.setText("Перемогли 0");
+
 		}
-		isComputer = false;
+//якщо перший гравець грає за хрестики то він переміг		
+		if(player1 == playerTurn ){
+			TOTALSCORE_PLAYER1++;
+			scorePlayer1.setText(Integer.toString(TOTALSCORE_PLAYER1));
+		} else {
+			TOTALSCORE_PLAYER2++;
+			scorePlayer2.setText(Integer.toString(TOTALSCORE_PLAYER2));
+		}
+		
+		isOver = true;
 	}
 
 	public void Draw() {
@@ -196,14 +273,14 @@ public class TicTacToe implements ActionListener {
 			buttons[i].setEnabled(false);
 		}
 		textfield.setText("Нічия");
+		isOver = true;
 	}
 
 //Комп'ютер виконує хід
-	public void comuterPlaying() {
-
+	public void aiPlaying() {
 //Для кожного можливого кроку знаходимо кінцевий стан		
 		String[] copyButtons = convertToString();
-		System.out.println("******new click*****");
+//		System.out.println("******new click*****");
 		
 //test 	
 //		copyButtons[0] = "0";
@@ -225,7 +302,6 @@ public class TicTacToe implements ActionListener {
 		} else {
 			turn0(bestScore.getPosition());
 		}
-
 	}
 
 	public String[] convertToString() {
@@ -315,8 +391,7 @@ public class TicTacToe implements ActionListener {
 	public int valuation(String[] moves, boolean oppTurn) {
 		int sign = 1;
 		int score = 0;
-		
-		
+				
 		if(oppTurn == playerTurn ) {
 			sign *=-1;
 		}
@@ -367,6 +442,24 @@ public class TicTacToe implements ActionListener {
 		return winCombination;
 	}
 
-
+//	ініціалізація гри
+	public void reset() {
+		isOver = false;
+		for (int i = 0; i < DEFAULT_BOARDSIZE; i++) {
+			buttons[i].setEnabled(true);
+			buttons[i].setName(null);
+			buttons[i].setIcon(null);
+			buttons[i].setBackground(new Color(99, 57, 116));
+		}	
+		
+		if (playerTurn) {
+			textfield.setText("Хід X");
+		} else {
+			textfield.setText("Хід 0");
+		}
+//Оновлюэмо за кого буде грати перший гравець		
+		player1 = playerTurn;
+	}
+	
 }
 
